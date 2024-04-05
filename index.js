@@ -26,7 +26,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
 
         const database = client.db("carDoctorDB");
         const serviceCollection = database.collection("services");
@@ -52,7 +52,7 @@ async function run() {
 
         // Get some booking data based on criteria (email)
         app.get('/bookings', async (req, res) => {
-            console.log(req.query.email);
+            // console.log(req.query.email);
             let query = {};
             if (req.query?.email) {
                 query = { email: req.query.email };
