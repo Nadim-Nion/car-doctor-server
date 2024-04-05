@@ -1,4 +1,4 @@
-## Car Doctor Website - Server-Side 
+## Car Doctor Website - Server Side 
 
 This repository hosts the server-side code for the Car Doctor website, providing APIs to manage services and bookings.
 
