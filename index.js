@@ -70,6 +70,28 @@ async function run() {
             res.send(result);
         })
 
+        // Update (Patch) a specific booking data
+        app.patch('/bookings/:id', async (req, res) => {
+            const id = req.params.id;
+            const booking = req.body;
+            const filter = { _id: id };
+            const updatedBooking = {
+                $set: {
+                    status: booking.status
+                }
+            }
+            const result = await bookingCollection.updateOne(filter, updatedBooking);
+            res.send(result);
+        })
+
+        // Delete specific booking data
+        app.delete('/bookings/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: id };
+            const result = await bookingCollection.deleteOne(query);
+            res.send(result);
+        })
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
