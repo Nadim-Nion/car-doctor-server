@@ -12,7 +12,8 @@ app.use(cors({
     origin: [
         // 'http://localhost:5173',
         'https://car-doctor-client-99145.web.app',
-        'https://car-doctor-client-99145.firebaseapp.com'
+        'https://car-doctor-client-99145.firebaseapp.com',
+        'https://car-doctor-client-nion.netlify.app'
     ],
     credentials: true
 }));
