@@ -30,28 +30,49 @@ const client = new MongoClient(uri, {
     }
 });
 
-// User defined middlewares
+/* User defined middlewares
 const logger = async (req, res, next) => {
-    console.log('called:', req.host, req.originalUrl);
-    next();
+   console.log('called:', req.host, req.originalUrl);
+   next();
 }
 
 const verifyToken = async (req, res, next) => {
+   const token = req.cookies.token;
+   console.log('Value of token in middleware:', token);
+   if (!token) {
+       return res.status(401).send({ message: 'unauthorized' });
+   }
+   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+       if (err) {
+           console.log(err);
+           return res.status(401).send({ message: 'unauthorized' });
+       }
+       console.log('value in the token', decoded);
+       req.user = decoded;
+       next();
+   })
+   
+} */
+
+// Custom Middlewares
+const logger = (req, res, next) => {
+    console.log('Logging info:', req.method, req.url);
+    next();
+}
+
+const verifyToken = (req, res, next) => {
     const token = req.cookies.token;
-    console.log('Value of token in middleware:', token);
+    console.log('Token in the custom middleware', token);
     if (!token) {
-        return res.status(401).send({ message: 'unauthorized' });
+        return res.status(401).send({ message: 'unauthorized access' });
     }
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
         if (err) {
-            console.log(err);
-            return res.status(401).send({ message: 'unauthorized' });
+            return res.status(401).send({ message: "unauthorized access" });
         }
-        console.log('value in the token', decoded);
         req.user = decoded;
         next();
     })
-    // next();
 }
 
 async function run() {
@@ -63,20 +84,48 @@ async function run() {
         const serviceCollection = database.collection("services");
         const bookingCollection = database.collection("bookings");
 
-        // auth or jwt related api
+        /* auth or jwt related api
         app.post('/jwt', logger, async (req, res) => {
             const user = req.body;
             console.log(user);
 
-            // Generate Access Token
+            Generate Access Token
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
 
-            // Set Token in HTTP Only Cookie
+             Set Token in HTTP Only Cookie
             res
                 .cookie('token', token, {
                     httpOnly: true,
                     secure: false,
                 })
+                .send({ success: true });
+        }) */
+
+        // JWT related API
+        app.post('/jwt', async (req, res) => {
+            const user = req.body;
+            console.log('User for token', user);
+
+            // Generate Access Token
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+
+            // Set Access Token in HTTP Only Cookie
+            res
+                .cookie('token', token, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: 'none'
+                })
+                .send({ success: true });
+        })
+
+        // Clear Cookie after Logging Out
+        app.post('/logout', async (req, res) => {
+            const user = req.body;
+            console.log('Logging Out', user);
+
+            res
+                .clearCookie('token', { maxAge: 0 })
                 .send({ success: true });
         })
 
@@ -102,10 +151,14 @@ async function run() {
         app.get('/bookings', logger, verifyToken, async (req, res) => {
             console.log(req.query.email);
             // console.log('Access Token', req.cookies.token);
-            console.log('user in the valid token:', req.user);
+            console.log('Owner of the token:', req.user);
+            if (req.user.email !== req.query.email) {
+                return res.status(403).send({ message: "forbidden access" });
+            }
+            /* console.log('user in the valid token:', req.user);
             if (req.user.email !== req.query.email) {
                 return res.send(403).send({ message: 'forbidden access' });
-            }
+            } */
             let query = {};
             if (req.query?.email) {
                 query = { email: req.query.email };
