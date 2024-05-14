@@ -10,11 +10,11 @@ const port = process.env.PORT || 5000;
 // Middleware
 app.use(cors({
     origin: [
-        // 'http://localhost:5173',
-        'https://car-doctor-client-99145.web.app',
+        'http://localhost:5173',
+        /* 'https://car-doctor-client-99145.web.app',
         'https://car-doctor-client-99145.firebaseapp.com',
         'https://car-doctor-client-nion.netlify.app',
-        'https://hungry-pancake.surge.sh'
+        'https://hungry-pancake.surge.sh' */
     ],
     credentials: true
 }));
@@ -87,7 +87,8 @@ async function run() {
         // await client.connect();
 
         const database = client.db("carDoctorDB");
-        const serviceCollection = database.collection("services");
+        // const serviceCollection = database.collection("services");
+        const serviceCollection = database.collection("newServices");
         const bookingCollection = database.collection("bookings");
 
         /* auth or jwt related api
@@ -137,7 +138,17 @@ async function run() {
 
         // Get all services data
         app.get('/services', async (req, res) => {
-            const cursor = serviceCollection.find();
+            const filter = req.query;
+            console.log(filter);
+            const query = {
+                title: { $regex: filter.search, $options: 'i' }
+            };
+            const options = {
+                sort: {
+                    price: filter.sort === "asc" ? 1 : -1,
+                }
+            };
+            const cursor = serviceCollection.find(query, options);
             const result = await cursor.toArray();
             res.send(result);
         })
