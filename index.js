@@ -10,11 +10,11 @@ const port = process.env.PORT || 5000;
 // Middleware
 app.use(cors({
     origin: [
-        'http://localhost:5173',
-        /* 'https://car-doctor-client-99145.web.app',
+        // 'http://localhost:5173',
+        'https://car-doctor-client-99145.web.app',
         'https://car-doctor-client-99145.firebaseapp.com',
         'https://car-doctor-client-nion.netlify.app',
-        'https://hungry-pancake.surge.sh' */
+        'https://hungry-pancake.surge.sh'
     ],
     credentials: true
 }));
